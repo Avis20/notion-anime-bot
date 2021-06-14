@@ -13,7 +13,7 @@ def get_log_name():
 
 def get_config():
     config = configparser.ConfigParser()
-    config.read('.config')
+    config.read('/home/yorlov/mysite/.config')
     return config
 
 if __name__ == '__main__':
