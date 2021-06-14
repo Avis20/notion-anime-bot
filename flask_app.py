@@ -1,12 +1,13 @@
 
 import logging
 import logging.handlers as handlers
+import uuid
 
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.types import ContentTypes
 from aiogram.utils.executor import start_webhook
-import uuid
+
 import utils
 
 # webhook settings
