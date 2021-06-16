@@ -11,7 +11,8 @@ telepot.api._pools = {
 telepot.api._onetime_pool_spec = (urllib3.ProxyManager, dict(
     proxy_url=proxy_url, num_pools=1, maxsize=1, retries=False, timeout=30))
 
-TOKEN = utils.get_config('telegram', 'BOT_TOKEN')
+config = utils.get_config()
+TOKEN = config.get('telegram', 'BOT_TOKEN')
 bot = telepot.Bot(TOKEN)
 bot.setWebhook("https://yorlov.pythonanywhere.com/webhook", max_connections=1)
 
