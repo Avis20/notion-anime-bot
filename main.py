@@ -13,9 +13,8 @@ logger = logging.getLogger()
 log_handler = handlers.RotatingFileHandler(utils.get_log_name(), maxBytes=5*1024, backupCount=2)
 logger.addHandler(log_handler)
 
-
-TOKEN = utils.BOT_TOKEN
-bot = Bot(token=TOKEN)
+config = utils.get_config()
+bot = Bot(token=config.get('telegram', 'BOT_TOKEN'))
 dp = Dispatcher(bot)
 
 dp.middleware.setup(LoggingMiddleware(logger=logger))
