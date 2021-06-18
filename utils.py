@@ -15,7 +15,8 @@ def get_log_name():
 
 def get_config():
     config = configparser.ConfigParser()
-    config.read(Path.home() / 'mysite' / '.config')
+    # config.read(Path.home() / 'mysite' / '.config')
+    config.read(Path.cwd() / '.config')
     return config
 
 

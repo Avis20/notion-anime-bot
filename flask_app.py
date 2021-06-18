@@ -1,35 +1,30 @@
-from flask import Flask, request
-import telepot
-import urllib3
+
+import logging
+import logging.handlers as handlers
+
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
+from aiogram.types import ContentTypes
+
 import utils
 
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger()
+log_handler = handlers.RotatingFileHandler(utils.get_log_name(), maxBytes=5*1024, backupCount=2)
+logger.addHandler(log_handler)
 
-proxy_url = "http://proxy.server:3128"
-telepot.api._pools = {
-    'default': urllib3.ProxyManager(proxy_url=proxy_url, num_pools=3, maxsize=10, retries=False, timeout=30),
-}
-telepot.api._onetime_pool_spec = (urllib3.ProxyManager, dict(
-    proxy_url=proxy_url, num_pools=1, maxsize=1, retries=False, timeout=30))
+# config = utils.get_config()
+# bot = Bot(token=config.get('telegram', 'BOT_TOKEN'))
+bot = Bot(token='1619204043:AAH56vPdnCBvS4P-z8cENZJ0VKXk4bAkOO8')
+dp = Dispatcher(bot)
 
-config = utils.get_config()
-TOKEN = config.get('telegram', 'BOT_TOKEN')
-bot = telepot.Bot(TOKEN)
-bot.setWebhook("https://yorlov.pythonanywhere.com/webhook", max_connections=1)
+dp.middleware.setup(LoggingMiddleware(logger=logger))
 
-app = Flask(__name__)
 
-@app.route('/')
-def echo():
-    return "Hello"
+@dp.message_handler(content_types=ContentTypes.TEXT)
+async def echo_msg(message: types.message):
+    await message.reply(message.text)
 
-@app.route('/webhook', methods=["POST"])
-def telegram_webhook():
-    update = request.get_json()
-    if "message" in update:
-        chat_id = update["message"]["chat"]["id"]
-        if "text" in update["message"]:
-            text = update["message"]["text"]
-            bot.sendMessage(chat_id, "From the web: you said '{}'".format(text))
-        else:
-            bot.sendMessage(chat_id, "From the web: sorry, I didn't understand that kind of message")
-    return "OK"
+
+if __name__ == '__main__':
+    executor.start_polling(dp)
