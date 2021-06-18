@@ -18,6 +18,9 @@ bot.setWebhook("https://yorlov.pythonanywhere.com/webhook", max_connections=1)
 
 app = Flask(__name__)
 
+@app.route('/')
+def echo():
+    return "Hello"
 
 @app.route('/webhook', methods=["POST"])
 def telegram_webhook():
