@@ -15,12 +15,11 @@ def get_log_name():
 
 def get_config():
     config = configparser.ConfigParser()
-    # config.read(Path.home() / 'mysite' / '.config')
-    config.read(Path.cwd() / '.config')
+    config.read(Path.home() / 'develop/notion-bot/' / '.config')
     return config
 
 
 if __name__ == '__main__':
     config = get_config()
     print(config)
-    print(config.get('telegram', 'BOT_TOKEN'))
+    print(config.get('telegram', 'bot_token'))

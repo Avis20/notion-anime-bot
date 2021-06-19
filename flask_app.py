@@ -17,7 +17,7 @@ log_handler = handlers.RotatingFileHandler(utils.get_log_name(), maxBytes=5*1024
 logger.addHandler(log_handler)
 
 config = utils.get_config()
-TOKEN = config.get('telegram', 'BOT_TOKEN')
+TOKEN = config.get('telegram', 'bot_token')
 WEBHOOK_HOST = config.get('site', 'webhook_host')
 WEBHOOK_PATH = '/webhook'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
