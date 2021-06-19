@@ -21,7 +21,7 @@ TOKEN = config.get('telegram', 'bot_token')
 WEBHOOK_HOST = config.get('site', 'webhook_host')
 WEBHOOK_PATH = '/webhook'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
-WEBAPP_HOST = 'localhost'
+WEBAPP_HOST = '127.0.0.1'
 WEBAPP_PORT = config.get('site', 'webhook_port')
 
 bot = None
