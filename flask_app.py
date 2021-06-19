@@ -6,8 +6,6 @@ from aiogram import Bot, Dispatcher, types, executor
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.types import ContentTypes
 
-from flask import Flask
-
 import utils
 
 logging.basicConfig(level=logging.DEBUG)
@@ -28,13 +26,6 @@ else:
 dp = Dispatcher(bot)
 dp.middleware.setup(LoggingMiddleware())
 
-app = Flask(__name__)
-
-
-@app.route('/')
-def echo():
-    return 'hello'
-
 
 @dp.message_handler(content_types=ContentTypes.TEXT)
 async def echo_msg(message: types.message):
@@ -43,4 +34,3 @@ async def echo_msg(message: types.message):
 
 if __name__ == '__main__':
     executor.start_polling(dp)
-    app.run()
