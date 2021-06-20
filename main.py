@@ -47,8 +47,8 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Привет! Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
-# @dp.message_handler(state=Form.search)
-@dp.message_handler()
+@dp.message_handler(state=Form.search)
+# @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['search'] = message.text
