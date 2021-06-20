@@ -44,15 +44,19 @@ async def start_cmd_handler(message: types.Message):
     )
     row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
     keyboard_markup.row(*row_btns)
-    await message.reply("Привет! Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
+    await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
 @dp.message_handler(state=Form.search)
 # @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
+    await state.finish()
     async with state.proxy() as data:
-        data['search'] = message.text
-    result = notion.search(message.text)
+        data['text'] = message.text
+    result, error = notion.search(message.text)
+    if error:
+        return await message.reply(error)
+
     if result.get('results'):
         count = len(result.get('results'))
         text = f'Найдено: {count} записей\n\n'
@@ -62,11 +66,25 @@ async def process_name(message: types.Message, state: FSMContext):
                 text += 'Смотреть: ' + item['properties'].get('url').get('url') + '\n\n'
             else:
                 text += '\n'
-        # data = result.get('results')[0]
-        # await message.reply(data['properties']['Name']['title'][0]['text']['content'])
         await message.reply(text)
     else:
         await message.reply(f"По запросу [{message.text}] ничего не найдено")
+
+
+@dp.message_handler(state=Form.create_page)
+# @dp.message_handler()
+async def process_name(message: types.Message, state: FSMContext):
+    await state.finish()
+    async with state.proxy() as data:
+        data['text'] = message.text
+    result, error = notion.create_page(message.text)
+    if error:
+        return await message.reply(error)
+
+    if result.get('id'):
+        await message.reply(result.get('id'))
+    else:
+        await message.reply("Не удалось создать страницу")
 
 
 @dp.callback_query_handler(text='search')
@@ -78,11 +96,8 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
     if answer_data == 'search':
         await Form.search.set()
     elif answer_data == 'create_page':
-        text = 'Oh no...Why so?'
+        await Form.create_page.set()
     else:
-        print("\n")
-        print('AAAAAAAAAa')
-        print("\n")
         text = f'Unexpected callback data {answer_data!r}!'
 
     await bot.send_message(query.from_user.id, 'Введите фразу для поиска')
