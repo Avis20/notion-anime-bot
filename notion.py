@@ -2,8 +2,9 @@ import requests
 import logging.config
 import utils
 from requests.exceptions import HTTPError
+from pathlib import Path
 
-logging.config.fileConfig("logging.conf")
+logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf')
 config = utils.get_config()
 token = config.get('notion', 'token')
 headers = {'Authorization': f"Bearer {token}"}
