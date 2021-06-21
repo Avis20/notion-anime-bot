@@ -2,16 +2,16 @@ import os
 
 import logging.config
 import notion
-from aiogram import Bot, Dispatcher, types, executor
+from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ContentTypes
 from aiogram.dispatcher import FSMContext
-
+from pathlib import Path
 import utils
 
-logging.config.fileConfig(fname='logging.conf', disable_existing_loggers=False)
+logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot' / 'logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 config = utils.get_config()
@@ -34,7 +34,8 @@ class Form(StatesGroup):
     create_page = State()
 
 
-@dp.message_handler(commands='start')
+# @dp.message_handler()
+@dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
     text_and_data = (
@@ -47,8 +48,8 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
-@dp.message_handler(state=Form.search)
-# @dp.message_handler()
+# @dp.message_handler(state=Form.search)
+@dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
@@ -59,14 +60,27 @@ async def process_name(message: types.Message, state: FSMContext):
 
     if result.get('results'):
         count = len(result.get('results'))
-        text = f'Найдено: {count} записей\n\n'
+        text = md.text(f'<b>Найдено:</b>{count} записей\n\n')
         for item in result.get('results'):
-            text += item['properties']['Name']['title'][0]['text']['content'] + '\n'
-            if item['properties'] and item['properties'].get('url'):
-                text += 'Смотреть: ' + item['properties'].get('url').get('url') + '\n\n'
+            # ID
+            id = item.get('id', '').replace('-', '')
+            parent_type = item.get('parent', {})['type']
+            parent_id = item.get('parent', {})[parent_type].replace('-', '')
+            page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
+            text += md.text(f'<b>ID:</b> <a href="{page_url}">{item.get("id")}</a>', '\n')
+
+            prop = item.get('properties', {})
+
+            text += md.text('<b>Название:</b>', prop.get('Name', {}).get('title', [])[0]['text']['content'], '\n')
+            text += md.text('<b>Категория:</b>', prop.get('Category', {}).get('multi_select', [{}])[0].get('name'), '\n')
+            text += md.text('<b>Статус:</b>', prop.get('Status', {}).get('select', {}).get('name'), '\n')
+            if prop.get('url'):
+                text += md.text('<b>Смотреть:</b>', prop.get('url', {}).get('url', {}), '\n')
             else:
                 text += '\n'
-        await message.reply(text)
+            text += '\n'
+
+        await message.reply(text, parse_mode='HTML')
     else:
         await message.reply(f"По запросу [{message.text}] ничего не найдено")
 

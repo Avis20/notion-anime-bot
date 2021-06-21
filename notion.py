@@ -16,7 +16,7 @@ def _error(error_res):
 
 
 def search(query):
-    url = config.get('notion', 'host') + '/v1/search'
+    url = config.get('notion', 'api_host') + '/v1/search'
     data = {"query": query}
     try:
         logging.debug(f"Try to send request = {url}")
@@ -30,7 +30,7 @@ def search(query):
 
 
 def create_page(title):
-    url = config.get('notion', 'host') + '/v1/pages/'
+    url = config.get('notion', 'api_host') + '/v1/pages/'
     data = dict()
     data.update({'parent': {'database_id': "5a0601ec5c5a4c26b983561bd105b387"}})
     data.update({'properties': {'Name': {'title': [{'text': {'content': title}}]}}})
