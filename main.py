@@ -34,7 +34,7 @@ class Form(StatesGroup):
     create_page = State()
 
 
-# @dp.message_handler()
+@dp.message_handler()
 @dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
@@ -48,8 +48,8 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
-# @dp.message_handler(state=Form.search)
-@dp.message_handler()
+@dp.message_handler(state=Form.search)
+# @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
