@@ -11,7 +11,7 @@ from aiogram.dispatcher import FSMContext
 from pathlib import Path
 import utils
 
-logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot' / 'logging.conf', disable_existing_loggers=False)
+logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
 
 config = utils.get_config()
