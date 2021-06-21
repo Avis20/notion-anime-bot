@@ -109,7 +109,14 @@ async def process_name(message: types.Message, state: FSMContext):
         return await message.reply(error)
 
     if result.get('id'):
-        await message.reply(result.get('id'))
+        # ID
+        text = ''
+        id = result.get('id', '').replace('-', '')
+        parent_type = result.get('parent', {})['type']
+        parent_id = result.get('parent', {})[parent_type].replace('-', '')
+        page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
+        text += md.text(f'<b>ID:</b> <a href="{page_url}">{result.get("id")}</a>', '\n')
+        await message.reply(text, parse_mode='HTML')
     else:
         await message.reply("Не удалось создать страницу")
 
@@ -122,12 +129,12 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
 
     if answer_data == 'search':
         await Form.search.set()
+        await bot.send_message(query.from_user.id, 'Введите фразу для поиска')
     elif answer_data == 'create_page':
         await Form.create_page.set()
+        await bot.send_message(query.from_user.id, 'Введите название страницы')
     else:
         text = f'Unexpected callback data {answer_data!r}!'
-
-    await bot.send_message(query.from_user.id, 'Введите фразу для поиска')
 
 
 if __name__ == '__main__':
