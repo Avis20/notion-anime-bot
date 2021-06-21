@@ -10,6 +10,7 @@ from aiogram.types import ContentTypes
 from aiogram.dispatcher import FSMContext
 from pathlib import Path
 import utils
+from aiogram.dispatcher.filters import Text
 
 logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf', disable_existing_loggers=False)
 logger = logging.getLogger(__name__)
@@ -48,10 +49,22 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    logging.info('Cancelling state %r', current_state)
+    await state.finish()
+    await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
+
+
 @dp.message_handler(state=Form.search)
 # @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
-    await state.finish()
+    # await state.finish()
     async with state.proxy() as data:
         data['text'] = message.text
     result, error = notion.search(message.text)
