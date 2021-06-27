@@ -35,7 +35,7 @@ class Form(StatesGroup):
     create_page = State()
 
 
-@dp.message_handler()
+# @dp.message_handler()
 @dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
@@ -61,8 +61,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
-@dp.message_handler(state=Form.search)
-# @dp.message_handler()
+# @dp.message_handler(state=Form.search)
+@dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     # await state.finish()
     async with state.proxy() as data:
@@ -71,31 +71,39 @@ async def process_name(message: types.Message, state: FSMContext):
     if error:
         return await message.reply(error)
 
-    if result.get('results'):
-        count = len(result.get('results'))
-        text = md.text(f'<b>Найдено:</b>{count} записей\n\n')
-        for item in result.get('results'):
-            # ID
-            id = item.get('id', '').replace('-', '')
-            parent_type = item.get('parent', {})['type']
-            parent_id = item.get('parent', {})[parent_type].replace('-', '')
-            page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
-            text += md.text(f'<b>ID:</b> <a href="{page_url}">{item.get("id")}</a>', '\n')
+    if not result.get('results'):
+        return await message.reply(f"По запросу [{message.text}] ничего не найдено")
 
-            prop = item.get('properties', {})
+    count = len(result.get('results'))
+    text = md.text(f'<b>Найдено:</b>{count} записей\n\n')
+    for item in result.get('results'):
+        # ID
+        id = item.get('id', '').replace('-', '')
+        parent_type = item.get('parent', {})['type']
+        parent_id = item.get('parent', {})[parent_type].replace('-', '')
+        page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
+        text += md.text(f'<b>ID:</b> <a href="{page_url}">{item.get("id")}</a>', '\n')
 
-            text += md.text('<b>Название:</b>', prop.get('Name', {}).get('title', [])[0]['text']['content'], '\n')
-            text += md.text('<b>Категория:</b>', prop.get('Category', {}).get('multi_select', [{}])[0].get('name'), '\n')
-            text += md.text('<b>Статус:</b>', prop.get('Status', {}).get('select', {}).get('name'), '\n')
-            if prop.get('url'):
-                text += md.text('<b>Смотреть:</b>', prop.get('url', {}).get('url', {}), '\n')
-            else:
-                text += '\n'
-            text += '\n'
+        prop = item.get('properties', {})
 
-        await message.reply(text, parse_mode='HTML')
-    else:
-        await message.reply(f"По запросу [{message.text}] ничего не найдено")
+        title = prop.get('Name', {}).get('title', [{}])
+        if title:
+            text += md.text('<b>Название:</b>', title[0]['text']['content'], '\n')
+
+        category = prop.get('Category', {}).get('multi_select', [{}])
+        if category:
+            text += md.text('<b>Категория:</b>', category[0].get('name'), '\n')
+
+        status = prop.get('Status', {}).get('select', {})
+        if status:
+            text += md.text('<b>Статус:</b>', status.get('name'), '\n')
+
+        url = prop.get('url', {})
+        if url:
+            text += md.text('<b>Смотреть:</b>', url.get('url', {}), '\n')
+
+        text += '\n'
+    await message.reply(text, parse_mode='HTML')
 
 
 @dp.message_handler(state=Form.create_page)
@@ -138,4 +146,4 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
 
 
 if __name__ == '__main__':
-    executor.start_polling(dp)
+    executor.start_polling(dp, timeout=20)

@@ -2,8 +2,20 @@
 import os
 import configparser
 from pathlib import Path
+import logging.config
 
-# BOT_TOKEN = os.environ.get('BOT_TOKEN')
+import sys
+
+logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf')
+
+"""
+def check_run_script():
+    pid = str(os.getpid())
+    pid_file = Path(Path.home() / 'develop/notion-bot/' / '.notion.pid')
+    if pid_file.exists():
+        logging.error(f"Script is already running! see {pid_file}")
+        sys.exit()
+"""
 
 
 def get_log_name():

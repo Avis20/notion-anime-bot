@@ -33,8 +33,8 @@ def search(query):
 def create_page(title):
     url = config.get('notion', 'api_host') + '/v1/pages/'
     data = dict()
-    data.update({'parent': {'database_id': "5a0601ec5c5a4c26b983561bd105b387"}})
-    data.update({'properties': {'Name': {'title': [{'text': {'content': title}}]}}})
+    data['parent'] = {'database_id': "5a0601ec5c5a4c26b983561bd105b387"}
+    data['properties'] = {'Name': {'title': [{'text': {'content': title}}]}}
     try:
         logging.debug(f"Try to send request = {url}")
         response = requests.post(url, json=data, headers=headers)
