@@ -1,6 +1,9 @@
 import os
 
 import logging.config
+
+import sys
+
 import notion
 from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -47,6 +50,12 @@ async def start_cmd_handler(message: types.Message):
     row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
     keyboard_markup.row(*row_btns)
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
+
+
+@dp.message_handler(state='*', commands='terminate')
+@dp.message_handler(Text(equals='terminate', ignore_case=True), state='*')
+async def terminate_handler(message: types.Message, state: FSMContext):
+    sys.exit()
 
 
 @dp.message_handler(state='*', commands='cancel')
