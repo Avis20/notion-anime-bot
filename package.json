@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "start": "python3 /app/main.py"
+    "start": "python3 /app/develop/notion-bot/main.py"
   }
 }
