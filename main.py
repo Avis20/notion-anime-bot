@@ -22,11 +22,11 @@ config = utils.get_config()
 TOKEN = config.get('telegram', 'bot_token')
 
 bot = None
-if not os.environ.get('PROXY_OFF'):
-    PROXY_URL = config.get('site', 'proxy_host')
-    bot = Bot(token=TOKEN, proxy=PROXY_URL)
-else:
-    bot = Bot(token=TOKEN)
+# if not os.environ.get('PROXY_OFF'):
+#     PROXY_URL = config.get('site', 'proxy_host')
+#     bot = Bot(token=TOKEN, proxy=PROXY_URL)
+# else:
+bot = Bot(token=TOKEN)
 
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
