@@ -2,11 +2,8 @@
 import os
 import configparser
 from pathlib import Path
-import logging.config
 
 import sys
-
-logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf')
 
 """
 def check_run_script():
@@ -16,14 +13,6 @@ def check_run_script():
         logging.error(f"Script is already running! see {pid_file}")
         sys.exit()
 """
-
-
-def get_log_name():
-    log_dir = Path.home() / 'logs'
-    if not log_dir.exists():
-        os.makedirs(log_dir)
-    return log_dir / 'notion-tg-bot.log'
-
 
 def get_config():
     config = configparser.ConfigParser()

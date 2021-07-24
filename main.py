@@ -1,22 +1,17 @@
-import os
-
-import logging.config
-
 import sys
 
-import notion
 from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from pathlib import Path
-import utils
 from aiogram.dispatcher.filters import Text
 
-logging.config.fileConfig(fname=Path.home() / 'develop/notion-bot/' / 'logging.conf', disable_existing_loggers=False)
-logger = logging.getLogger(__name__)
+import nlogger
+import notion
+import utils
 
+logger = nlogger.get_logger()
 config = utils.get_config()
 TOKEN = config.get('telegram', 'bot_token')
 
@@ -47,11 +42,12 @@ async def start_cmd_handler(message: types.Message):
 
 
 # Убить процесс
+'''
 @dp.message_handler(state='*', commands='terminate')
 @dp.message_handler(Text(equals='terminate', ignore_case=True), state='*')
 async def terminate_handler(message: types.Message, state: FSMContext):
     sys.exit()
-
+'''
 
 @dp.message_handler(state='*', commands='cancel')
 @dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
@@ -60,7 +56,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
 
-    logging.info('Cancelling state %r', current_state)
+    logger.info('Cancelling state %r', current_state)
     await state.finish()
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
