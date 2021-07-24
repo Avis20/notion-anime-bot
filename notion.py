@@ -2,6 +2,7 @@ import requests
 import utils
 from requests.exceptions import HTTPError
 import nlogger
+import anime_parser
 
 logger = nlogger.get_logger()
 config = utils.get_config()
@@ -30,11 +31,13 @@ def search(query):
         return response.json(), None
 
 
-def create_page(title):
+def create_page(link):
+    anime_data = anime_parser.search_data(link)
+    # print(anime_data)
     url = config.get('notion', 'api_host') + '/v1/pages/'
     data = dict()
-    data['parent'] = {'database_id': "5a0601ec5c5a4c26b983561bd105b387"}
-    data['properties'] = {'Name': {'title': [{'text': {'content': title}}]}}
+    data['parent'] = {'database_id': config.get('notion', 'database_id')}
+    data['properties'] = {'Name': {'title': [{'text': {'content': anime_data.get('title')}}]}}
     try:
         logger.debug(f"Try to send request = {url}")
         response = requests.post(url, json=data, headers=headers)
@@ -45,7 +48,7 @@ def create_page(title):
         logger.info("Success")
         return response.json(), None
 
-
 if __name__ == '__main__':
     # print(search('hello'))
-    create_page('hello')
+    # create_page("https://shikimori.one/animes/39247-kobayashi-san-chi-no-maid-dragon-s")
+    print(1)

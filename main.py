@@ -49,6 +49,7 @@ async def terminate_handler(message: types.Message, state: FSMContext):
     sys.exit()
 '''
 
+
 @dp.message_handler(state='*', commands='cancel')
 @dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
 async def cancel_handler(message: types.Message, state: FSMContext):
@@ -61,8 +62,8 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
-# @dp.message_handler(state=Form.search)
-@dp.message_handler()
+@dp.message_handler(state=Form.search)
+# @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     # await state.finish()
     async with state.proxy() as data:
@@ -106,8 +107,8 @@ async def process_name(message: types.Message, state: FSMContext):
     await message.reply(text, parse_mode='HTML')
 
 
-@dp.message_handler(state=Form.create_page)
-# @dp.message_handler()
+# @dp.message_handler(state=Form.create_page)
+@dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
