@@ -16,7 +16,7 @@ def check_run_script():
 
 def get_config():
     config = configparser.ConfigParser()
-    config.read(Path.home() / 'develop/notion-bot/' / '.config')
+    config.read(Path.home() / 'develop/notion-bot/' / 'config.ini')
     return config
 
 

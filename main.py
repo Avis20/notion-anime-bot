@@ -1,5 +1,3 @@
-import sys
-
 from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -8,8 +6,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
 import nlogger
-import notion
+import my_notion
 import utils
+import anime_parser
 
 logger = nlogger.get_logger()
 config = utils.get_config()
@@ -113,7 +112,10 @@ async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
         data['text'] = message.text
-    result, error = notion.create_page(message.text)
+    find_data = anime_parser.search_data(message.text)
+    print(find_data)
+    await message.reply("test")
+    result, error = my_notion.create_page(message.text)
     if error:
         return await message.reply(error)
 
@@ -121,9 +123,8 @@ async def process_name(message: types.Message, state: FSMContext):
         # ID
         text = ''
         id = result.get('id', '').replace('-', '')
-        parent_type = result.get('parent', {})['type']
-        parent_id = result.get('parent', {})[parent_type].replace('-', '')
-        page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
+        database_id = config.get('notion', 'database_id')
+        page_url = f"{config.get('notion', 'host')}/{database_id}?p={id}"
         text += md.text(f'<b>ID:</b> <a href="{page_url}">{result.get("id")}</a>', '\n')
         await message.reply(text, parse_mode='HTML')
     else:

@@ -1,3 +1,11 @@
+
+'''
+Старый модуль для работы с notion
+Основная проблема то что нельзя загружать файлы по api v1
+пока заюзал сторонний модуль (https://pythonrepo.com/repo/jamalex-notion-py-python-third-party-apis-wrappers)
+из неофициальных источников
+'''
+
 import requests
 import utils
 from requests.exceptions import HTTPError

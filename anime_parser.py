@@ -1,6 +1,6 @@
 
 from urllib.parse import urlparse
-from . import shikimori
+from model import shikimori
 
 ROUTE = {
     'shikimori.one': shikimori.parse
@@ -9,10 +9,8 @@ ROUTE = {
 
 def search_data(url):
     parse_url = urlparse(url)
-    host = parse_url.netloc
-    result = ROUTE[host](url)
+    result = ROUTE[parse_url.netloc](url)
     return result
-
 
 
 if __name__ == '__main__':
