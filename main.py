@@ -1,3 +1,4 @@
+import sys
 from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
@@ -26,27 +27,13 @@ class Form(StatesGroup):
     create_page = State()
 
 
-# @dp.message_handler()
-@dp.message_handler(state='*', commands='start')
-async def start_cmd_handler(message: types.Message):
-    keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
-    text_and_data = (
-        ('Поиск', 'search'),
-        ('Создать страницу', 'create_page'),
-        ('Отмена', 'cancel'),
-    )
-    row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
-    keyboard_markup.row(*row_btns)
-    await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
-
-
 # Убить процесс
-'''
-@dp.message_handler(state='*', commands='terminate')
-@dp.message_handler(Text(equals='terminate', ignore_case=True), state='*')
-async def terminate_handler(message: types.Message, state: FSMContext):
+@dp.message_handler(state='*', commands='kill')
+@dp.message_handler(Text(equals='kill', ignore_case=True), state='*')
+async def kill_handler(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.reply("Процесс остановлен")
     sys.exit()
-'''
 
 
 @dp.message_handler(state='*', commands='cancel')
@@ -61,13 +48,27 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
 
 
+@dp.message_handler()
+@dp.message_handler(state='*', commands='start')
+async def start_cmd_handler(message: types.Message):
+    keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
+    text_and_data = (
+        ('Поиск', 'search'),
+        ('Создать страницу', 'create_page'),
+        ('Отмена', 'cancel'),
+    )
+    row_btns = (types.InlineKeyboardButton(text, callback_data=data) for text, data in text_and_data)
+    keyboard_markup.row(*row_btns)
+    await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
+
+
 @dp.message_handler(state=Form.search)
 # @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
-    # await state.finish()
+    await state.finish()
     async with state.proxy() as data:
         data['text'] = message.text
-    result, error = notion.search(message.text)
+    result, error = my_notion.search(message.text)
     if error:
         return await message.reply(error)
 
@@ -106,8 +107,8 @@ async def process_name(message: types.Message, state: FSMContext):
     await message.reply(text, parse_mode='HTML')
 
 
-# @dp.message_handler(state=Form.create_page)
-@dp.message_handler()
+@dp.message_handler(state=Form.create_page)
+# @dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
