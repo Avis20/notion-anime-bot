@@ -113,9 +113,7 @@ async def process_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['text'] = message.text
     find_data = anime_parser.search_data(message.text)
-    print(find_data)
-    await message.reply("test")
-    result, error = my_notion.create_page(message.text)
+    result, error = my_notion.create_page(find_data)
     if error:
         return await message.reply(error)
 
