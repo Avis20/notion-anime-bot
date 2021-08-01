@@ -28,16 +28,18 @@ class Form(StatesGroup):
 
 
 # Убить процесс
-@dp.message_handler(state='*', commands='kill')
-@dp.message_handler(Text(equals='kill', ignore_case=True), state='*')
+'''
+@dp.message_handler(state=Form.kill)
 async def kill_handler(message: types.Message, state: FSMContext):
     await state.finish()
     await message.reply("Процесс остановлен")
     sys.exit()
+'''
 
 
+'''
 @dp.message_handler(state='*', commands='cancel')
-@dp.message_handler(Text(equals='cancel', ignore_case=True), state='*')
+@dp.message_handler(Text(equals='cancel', ignore_case=True), state=)
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -46,9 +48,10 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     logger.info('Cancelling state %r', current_state)
     await state.finish()
     await message.reply('Cancelled.', reply_markup=types.ReplyKeyboardRemove())
+'''
 
 
-@dp.message_handler()
+# @dp.message_handler()
 @dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
@@ -63,7 +66,7 @@ async def start_cmd_handler(message: types.Message):
 
 
 @dp.message_handler(state=Form.search)
-# @dp.message_handler()
+@dp.message_handler()
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:

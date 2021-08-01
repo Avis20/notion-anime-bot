@@ -20,9 +20,6 @@ def parse(url):
     image = content.find('div', {"class": "c-image"})
     result['cover'] = image.find('img')['src']
 
-    # status
-    result['status'] = 'Разобрать'
-
     return result
 
 
