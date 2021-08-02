@@ -1,13 +1,11 @@
-import sys
 from aiogram import Bot, Dispatcher, types, executor, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters import Text
 
 import nlogger
-import my_notion
+from model import notion_model
 import utils
 import anime_parser
 
@@ -65,13 +63,13 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
-@dp.message_handler(state=Form.search)
 @dp.message_handler()
+@dp.message_handler(state=Form.search)
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
         data['text'] = message.text
-    result, error = my_notion.search(message.text)
+    result, error = notion_model.search_page(message.text)
     if error:
         return await message.reply(error)
 
@@ -83,16 +81,16 @@ async def process_name(message: types.Message, state: FSMContext):
     for item in result.get('results'):
         # ID
         id = item.get('id', '').replace('-', '')
-        parent_type = item.get('parent', {})['type']
-        parent_id = item.get('parent', {})[parent_type].replace('-', '')
-        page_url = f"{config.get('notion', 'host')}/{parent_id}?p={id}"
-        text += md.text(f'<b>ID:</b> <a href="{page_url}">{item.get("id")}</a>', '\n')
 
-        prop = item.get('properties', {})
+        database_id = config.get('notion', 'database_id')
+        page_url = f"{config.get('notion', 'host')}/{database_id}?p={id}"
+        text += md.text(f'<b>ID:</b> <a href="{page_url}">{id}</a>', '\n')
 
-        title = prop.get('Name', {}).get('title', [{}])
-        if title:
-            text += md.text('<b>Название:</b>', title[0]['text']['content'], '\n')
+        text += md.text('<b>Название:</b>', item.get('title', {}), '\n')
+        text += md.text('<b>Категория:</b>', item.get('categories', {}), '\n')
+        text += '\n'
+    await message.reply(text, parse_mode='HTML')
+"""
 
         category = prop.get('Category', {}).get('multi_select', [{}])
         if category:
@@ -105,9 +103,7 @@ async def process_name(message: types.Message, state: FSMContext):
         url = prop.get('url', {})
         if url:
             text += md.text('<b>Смотреть:</b>', url.get('url', {}), '\n')
-
-        text += '\n'
-    await message.reply(text, parse_mode='HTML')
+"""
 
 
 @dp.message_handler(state=Form.create_page)
@@ -117,7 +113,7 @@ async def process_name(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['text'] = message.text
     find_data = anime_parser.search_data(message.text)
-    result, error = my_notion.create_page(find_data)
+    result, error = notion_model.create_page(find_data)
     if error:
         return await message.reply(error)
 
