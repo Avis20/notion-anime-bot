@@ -1,8 +1,9 @@
-from aiogram import Bot, Dispatcher, types, executor, md
+from aiogram import Bot, Dispatcher, types, md
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
+from aiogram.utils.executor import start_webhook
 
 import nlogger
 from model import notion_model
@@ -14,6 +15,15 @@ config = utils.get_config()
 TOKEN = config.get('telegram', 'bot_token')
 
 bot = Bot(token=TOKEN)
+
+# webhook settings
+WEBHOOK_HOST = config.get('telegram', 'webhook_host')
+WEBHOOK_PATH = '/webhook'
+WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+
+# webserver settings
+WEBAPP_HOST = 'localhost'
+WEBAPP_PORT = config.get('telegram', 'webapp_port')
 
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
@@ -49,7 +59,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 '''
 
 
-# @dp.message_handler()
+@dp.message_handler()
 @dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)
@@ -63,7 +73,7 @@ async def start_cmd_handler(message: types.Message):
     await message.reply("Notion bot приветствует тебя\nКакую команду хочешь выполнить?", reply_markup=keyboard_markup)
 
 
-@dp.message_handler()
+# @dp.message_handler()
 @dp.message_handler(state=Form.search)
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
@@ -84,26 +94,14 @@ async def process_name(message: types.Message, state: FSMContext):
 
         database_id = config.get('notion', 'database_id')
         page_url = f"{config.get('notion', 'host')}/{database_id}?p={id}"
-        text += md.text(f'<b>ID:</b> <a href="{page_url}">{id}</a>', '\n')
 
+        text += md.text(f'<b>ID:</b> <a href="{page_url}">{id}</a>', '\n')
         text += md.text('<b>Название:</b>', item.get('title', {}), '\n')
         text += md.text('<b>Категория:</b>', item.get('categories', {}), '\n')
+        text += md.text('<b>Статус:</b>', item.get('name'), '\n')
+        text += md.text('<b>Смотреть:</b>', item.get('url', {}), '\n')
         text += '\n'
     await message.reply(text, parse_mode='HTML')
-"""
-
-        category = prop.get('Category', {}).get('multi_select', [{}])
-        if category:
-            text += md.text('<b>Категория:</b>', category[0].get('name'), '\n')
-
-        status = prop.get('Status', {}).get('select', {})
-        if status:
-            text += md.text('<b>Статус:</b>', status.get('name'), '\n')
-
-        url = prop.get('url', {})
-        if url:
-            text += md.text('<b>Смотреть:</b>', url.get('url', {}), '\n')
-"""
 
 
 @dp.message_handler(state=Form.create_page)
@@ -145,5 +143,25 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
         text = f'Unexpected callback data {answer_data!r}!'
 
 
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+
+
+async def on_shutdown(dp):
+    logger.warning('Shutting down..')
+    await bot.delete_webhook()
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+    logger.warning('Bye!')
+
+
 if __name__ == '__main__':
-    executor.start_polling(dp, timeout=20)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT,
+    )

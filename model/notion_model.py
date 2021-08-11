@@ -18,18 +18,19 @@ def search_page(search_string):
         })
     return {"results": result}, None
 
+
 def create_page(data):
     cv = collection_view()
     row = cv.collection.add_row()
-    # for key in ['title', 'status', 'cover']:
-    #     row.key = data.get(key, '')
 
     row.image = data.get('cover', '')
-    row.title = data.get('title', '')
-    row.status = data.get('status', '')
-    row.Category = data.get('Category', '')
-    row.url = data.get('url', '')
-    row.Stoppet_at = data.get('Stoppet_at', '')
+
+    print("before get_all_properties", row.get_all_properties())
+
+    for key in ['title', 'status', 'Category', 'url', 'stopped_at']:
+        row.set_property(key, data.get(key, ''))
+
+    print("after get_all_properties", row.get_all_properties())
 
     return row, None
 
@@ -42,6 +43,6 @@ def collection_view():
 
 
 if __name__ == '__main__':
-    res = search_page('king')
-    print('<b>Категория:</b>', res[1].get('categories', {}), '\n')
-    # create_page({'title': 'hello', 'status': 'Разобрать'})
+    # res = search_page('king')
+    # print('<b>Категория:</b>', res[1].get('categories', {}), '\n')
+    create_page({'title': 'hello', 'status': 'Not started'})
