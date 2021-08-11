@@ -23,7 +23,7 @@ WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 # webserver settings
 WEBAPP_HOST = 'localhost'
-WEBAPP_PORT = config.get('telegram', 'webapp_port')
+WEBAPP_PORT = config.get('app', 'webapp_port')
 
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
