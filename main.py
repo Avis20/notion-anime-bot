@@ -104,13 +104,16 @@ async def process_name(message: types.Message, state: FSMContext):
     await message.reply(text, parse_mode='HTML')
 
 
-@dp.message_handler(state=Form.create_page)
 # @dp.message_handler()
+@dp.message_handler(state=Form.create_page)
 async def process_name(message: types.Message, state: FSMContext):
     await state.finish()
     async with state.proxy() as data:
         data['text'] = message.text
-    find_data = anime_parser.search_data(message.text)
+    find_data, error = anime_parser.search_data(message.text)
+    if error:
+        return await message.reply(error)
+
     result, error = notion_model.create_page(find_data)
     if error:
         return await message.reply(error)
@@ -138,7 +141,7 @@ async def inline_kb_answer_callback_handler(query: types.CallbackQuery):
         await bot.send_message(query.from_user.id, 'Введите фразу для поиска')
     elif answer_data == 'create_page':
         await Form.create_page.set()
-        await bot.send_message(query.from_user.id, 'Введите название страницы')
+        await bot.send_message(query.from_user.id, 'Введите URL страницы')
     else:
         text = f'Unexpected callback data {answer_data!r}!'
 
