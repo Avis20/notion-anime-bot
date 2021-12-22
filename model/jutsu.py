@@ -2,6 +2,7 @@ import requests as r
 from bs4 import BeautifulSoup
 import re
 
+
 def parse(url):
 
     response = r.get(url, headers={
@@ -24,8 +25,6 @@ def parse(url):
     print("style", style, 'type', type(style))
     match = re.search("http.*\.(jpg|png)", style)
     result['cover'] = match.group()
-
-
     return result
 
 

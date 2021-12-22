@@ -1,5 +1,6 @@
 from notion.client import NotionClient
 import utils
+import anime_parser
 from urllib.parse import urlparse, urljoin, urlencode, urlunparse
 
 config = utils.get_config()
@@ -42,7 +43,15 @@ def collection_view():
     return client.get_collection_view(urlunparse(url_parse))
 
 
+def search_and_create(url):
+    find_data = anime_parser.search_data(url)
+    result, error = create_page(find_data)
+    return result
+
+
 if __name__ == '__main__':
     # res = search_page('king')
     # print('<b>Категория:</b>', res[1].get('categories', {}), '\n')
-    create_page({'title': 'hello', 'status': 'Not started'})
+    # create_page({'title': 'hello', 'status': 'Not started'})
+    search_and_create("https://shikimori.one/animes/45576-mushoku-tensei-isekai-ittara-honki-dasu-part-2")
+

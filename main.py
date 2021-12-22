@@ -16,10 +16,14 @@ TOKEN = config.get('telegram', 'bot_token')
 
 bot = Bot(token=TOKEN)
 
+
 # webhook settings
 WEBHOOK_HOST = config.get('telegram', 'webhook_host')
 WEBHOOK_PATH = '/webhook'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
+#
+# if config.get('app', 'run_local'):
+#
 
 # webserver settings
 WEBAPP_HOST = 'localhost'
@@ -59,7 +63,7 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 '''
 
 
-@dp.message_handler()
+# @dp.message_handler()
 @dp.message_handler(state='*', commands='start')
 async def start_cmd_handler(message: types.Message):
     keyboard_markup = types.InlineKeyboardMarkup(row_width=3)

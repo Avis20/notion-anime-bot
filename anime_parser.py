@@ -21,4 +21,5 @@ def search_data(url):
 
 if __name__ == '__main__':
     # print(search_data("https://shikimori.one/animes/39247-kobayashi-san-chi-no-maid-dragon-s"))
-    print(search_data("https://jut.su/bokurema/"))
+    print(search_data("https://shikimori.one/animes/43523-tsuki-ga-michibiku-isekai-douchuu"))
+    # print(search_data("https://jut.su/bokurema/"))
