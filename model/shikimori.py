@@ -18,7 +18,7 @@ def parse(url):
     # cover
     content = section.find('div', {"class": "l-content"})
     image = content.find('div', {"class": "c-image"})
-    result['cover'] = image.find('img')['src']
+    result['cover'] = image.find('img')['src'].split('?')[0]
 
     return result
 
